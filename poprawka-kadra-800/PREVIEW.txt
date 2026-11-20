@@ -1,0 +1,4 @@
+branch: poprawka-kadra-800
+commit: 434c511
+paths: /
+created: 2026-11-20 16:38
