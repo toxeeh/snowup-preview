@@ -71,7 +71,7 @@
 	letter-spacing: .3px;
 }
 .booking247-pill__text { display: flex; flex-direction: column; }
-.booking247-pill__label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
+.booking247-pill__label { font-size: 12px; font-weight: 600; letter-spacing: .2px; }
 .booking247-pill__phone { font-size: 15px; font-weight: 700; }
 .main-header .call-wrapper:empty { display: none; }
 

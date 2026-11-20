@@ -1,4 +1,4 @@
 branch: rezerwacje-24-7
-commit: 9d11f2c
+commit: a51daab
 paths: / /en/
-created: 2026-11-20 17:21
+created: 2026-11-20 18:00
