@@ -1,0 +1,4 @@
+branch: cennik
+commit: 3076e7d
+paths: /cennik/
+created: 2026-11-20 17:44
