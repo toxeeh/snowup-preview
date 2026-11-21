@@ -1,4 +1,0 @@
-branch: kontakt
-commit: b6aa96c
-paths: /kontakt/
-created: 2026-11-21 12:52
