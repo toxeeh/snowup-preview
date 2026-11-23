@@ -1,0 +1,4 @@
+branch: dofinansowania
+commit: 362033e
+paths: /dofinansowania/
+created: 2026-11-23 18:41
