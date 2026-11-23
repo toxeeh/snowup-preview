@@ -1,0 +1,66 @@
+/* Kursy: znacznik dofinansowania + układ opisu kursu (klasy .cx-* używane w polu „Opis” w wp-admin).
+   Kolory marki: granat #15446a, niebieski #1361a0, zieleń #a4bd1a, tło #eff7fd, tekst #3e5569. */
+
+/* ---------- znacznik „Dostępne dofinansowanie” ---------- */
+.funding-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px 6px 6px;
+	border-radius: 100px;
+	background: #a4bd1a;
+	color: #15446a !important;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.2;
+	text-decoration: none !important;
+	box-shadow: 0 4px 14px rgba(21, 68, 106, .18);
+	transition: background-color .15s, color .15s;
+}
+.funding-badge__icon { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #15446a; color: #fff; font-size: 13px; }
+.funding-badge__go { font-weight: 600; opacity: .85; }
+.funding-badge:hover, .funding-badge:focus-visible { background: #15446a; color: #fff !important; }
+.funding-badge:hover .funding-badge__icon { background: #a4bd1a; color: #15446a; }
+
+/* na karcie kursu – nad zdjęciem */
+.course-item--funding { position: relative; }
+.funding-badge--card { position: absolute; top: 12px; left: 12px; z-index: 2; }
+/* na stronie kursu – pod ceną */
+.funding-badge--page { margin: 4px 0 16px; }
+
+/* ---------- opis kursu ---------- */
+.course-desc__content .cx-lead { font-size: 18px; line-height: 1.6; color: #15446a; margin: 0 0 24px; }
+
+.cx-facts { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); margin: 0 0 32px; padding: 0; list-style: none; }
+@media (min-width: 900px) { .cx-facts { grid-template-columns: repeat(4, 1fr); } }
+.cx-facts li { margin: 0; padding: 16px; border-radius: 16px; background: #fdfeff; border: 2px solid #dbe9f5; list-style: none; }
+.cx-facts li::before { display: none; }
+.cx-facts b { display: block; font-size: 13px; font-weight: 600; color: #1361a0; margin-bottom: 4px; }
+.cx-facts span { display: block; font-size: 17px; font-weight: 700; color: #15446a; line-height: 1.3; }
+
+.course-desc__content h3 { color: #15446a; margin-top: 32px; }
+
+.cx-path { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 8px; padding: 0; list-style: none; }
+.cx-path li { margin: 0; padding: 8px 14px; border-radius: 100px; border: 2px solid #dbe9f5; background: #fdfeff; color: #3e5569; font-size: 14px; font-weight: 600; list-style: none; }
+.cx-path li::before { display: none; }
+.cx-path li.is-here { border-color: #a4bd1a; background: #a4bd1a; color: #15446a; }
+.cx-path li + li { position: relative; }
+.cx-hint { font-size: 14px; color: #3e5569; opacity: .9; }
+
+.cx-cols { display: grid; gap: 16px; margin: 12px 0; }
+@media (min-width: 768px) { .cx-cols { grid-template-columns: 1fr 1fr; } }
+.cx-box { padding: 20px; border-radius: 16px; border: 2px solid #dbe9f5; background: #fdfeff; }
+.course-desc__content .cx-box h4 { margin: 0 0 10px; color: #15446a; font-size: 20px; line-height: 1.3; font-weight: 700; }
+.cx-box ul, .cx-box ol { margin: 0; padding-left: 20px; }
+.cx-box li { margin: 4px 0; }
+.cx-box--yes { border-color: #a4bd1a; }
+
+.cx-funding { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin: 32px 0; padding: 20px 24px; border-radius: 18px; background: #15446a; color: #fff; }
+.cx-funding p { margin: 0; max-width: 640px; color: #fff; }
+.cx-funding b { color: #a4bd1a; }
+.cx-funding a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 12px; background: #a4bd1a; color: #15446a !important; font-weight: 700; text-decoration: none !important; }
+.cx-funding a:hover { background: #fff; }
+
+.cx-contact { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.cx-contact a { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 12px; background: #eff7fd; color: #1361a0 !important; font-weight: 600; text-decoration: none !important; }
+.cx-contact a:hover { background: #a4bd1a; color: #15446a !important; }
