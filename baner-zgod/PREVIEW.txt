@@ -1,4 +1,0 @@
-branch: baner-zgod
-commit: 95d8b6c
-paths: / /szkolka/
-created: 2026-11-27 18:46
