@@ -1,0 +1,182 @@
+/*
+ * Baner zgód (cookies) — własny, bez wtyczki. Współpracuje z Google Consent Mode v2:
+ * domyślne odmowy ustawia views/parts/consent-default.twig (przed GTM), tu zapisujemy wybór
+ * w cookie su_consent i wysyłamy gtag('consent','update') + zdarzenie su_consent_update do dataLayer
+ * (na nie w GTM odpalają się tagi, które czekały na zgodę, np. Meta Pixel).
+ *
+ * Kategorie: niezbędne (zawsze), statystyka (GA4) = analytics_storage, marketing (Meta, Google Ads) = ad_*.
+ * Ponowne otwarcie: dowolny element z atrybutem data-su-consent-open (link w stopce).
+ */
+(function () {
+  'use strict';
+
+  var COOKIE = 'su_consent';
+  var MAX_AGE = 60 * 60 * 24 * 365; // 12 miesięcy
+
+  var T = {
+    pl: {
+      title: 'Szanujemy Twoją prywatność',
+      body: 'Używamy plików cookies niezbędnych do działania strony. Za Twoją zgodą użyjemy też cookies statystycznych (Google Analytics), żeby wiedzieć, co ulepszać, oraz marketingowych (Google Ads, Meta), żeby mierzyć skuteczność reklam. Zgodę możesz w każdej chwili zmienić w stopce strony.',
+      policy: 'Polityka prywatności',
+      accept: 'Akceptuję wszystkie',
+      reject: 'Odrzucam opcjonalne',
+      settings: 'Ustawienia',
+      save: 'Zapisz wybór',
+      necessary: 'Niezbędne',
+      necessaryDesc: 'Działanie strony i zapamiętanie Twojego wyboru. Zawsze włączone.',
+      statistics: 'Statystyka',
+      statisticsDesc: 'Google Analytics — anonimowe statystyki odwiedzin.',
+      marketing: 'Marketing',
+      marketingDesc: 'Google Ads i Meta (Facebook, Instagram) — pomiar i dopasowanie reklam.',
+      always: 'zawsze'
+    },
+    en: {
+      title: 'We respect your privacy',
+      body: 'We use cookies that are necessary for the site to work. With your consent we will also use analytics cookies (Google Analytics) to improve the site and marketing cookies (Google Ads, Meta) to measure our ads. You can change your choice at any time in the footer.',
+      policy: 'Privacy policy',
+      accept: 'Accept all',
+      reject: 'Reject optional',
+      settings: 'Settings',
+      save: 'Save choice',
+      necessary: 'Necessary',
+      necessaryDesc: 'Site functionality and remembering your choice. Always on.',
+      statistics: 'Analytics',
+      statisticsDesc: 'Google Analytics — anonymous visit statistics.',
+      marketing: 'Marketing',
+      marketingDesc: 'Google Ads and Meta (Facebook, Instagram) — ad measurement and personalisation.',
+      always: 'always'
+    },
+    cs: {
+      title: 'Respektujeme vaše soukromí',
+      body: 'Používáme cookies nezbytné pro fungování webu. S vaším souhlasem použijeme také analytické cookies (Google Analytics) ke zlepšování webu a marketingové cookies (Google Ads, Meta) k měření reklam. Volbu můžete kdykoli změnit v patičce webu.',
+      policy: 'Zásady ochrany osobních údajů',
+      accept: 'Přijmout vše',
+      reject: 'Odmítnout volitelné',
+      settings: 'Nastavení',
+      save: 'Uložit volbu',
+      necessary: 'Nezbytné',
+      necessaryDesc: 'Fungování webu a zapamatování vaší volby. Vždy zapnuto.',
+      statistics: 'Statistika',
+      statisticsDesc: 'Google Analytics — anonymní statistiky návštěv.',
+      marketing: 'Marketing',
+      marketingDesc: 'Google Ads a Meta (Facebook, Instagram) — měření a přizpůsobení reklam.',
+      always: 'vždy'
+    }
+  };
+
+  var lang = (document.documentElement.lang || 'pl').slice(0, 2).toLowerCase();
+  var t = T[lang] || T.pl;
+  var policyUrl = '/polityka-prywatnosci/';
+
+  function read() {
+    try {
+      var m = document.cookie.match(/(?:^|; )su_consent=([^;]*)/);
+      var c = m ? JSON.parse(decodeURIComponent(m[1])) : null;
+      return c && c.v === 1 ? c : null;
+    } catch (e) { return null; }
+  }
+
+  function g(b) { return b ? 'granted' : 'denied'; }
+
+  function save(stats, marketing) {
+    var prev = read();
+    var c = { v: 1, s: stats ? 1 : 0, m: marketing ? 1 : 0, t: Date.now() };
+    document.cookie = COOKIE + '=' + encodeURIComponent(JSON.stringify(c)) + '; Max-Age=' + MAX_AGE +
+      '; Path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+    window.suConsent = c;
+
+    // Cofnięcie wcześniej udzielonej zgody: przeładowanie strony zatrzymuje już uruchomione skrypty.
+    if (prev && ((prev.s && !c.s) || (prev.m && !c.m))) {
+      location.reload();
+      return;
+    }
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: g(c.s),
+        ad_storage: g(c.m), ad_user_data: g(c.m), ad_personalization: g(c.m)
+      });
+    }
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'su_consent_update', consent_statistics: g(c.s), consent_marketing: g(c.m) });
+  }
+
+  var root = null;
+
+  function build() {
+    root = document.createElement('div');
+    root.className = 'su-consent';
+    root.setAttribute('role', 'dialog');
+    root.setAttribute('aria-live', 'polite');
+    root.setAttribute('aria-labelledby', 'su-consent-title');
+    root.innerHTML =
+      '<div class="su-consent__box">' +
+        '<h2 class="su-consent__title" id="su-consent-title">' + t.title + '</h2>' +
+        '<p class="su-consent__text">' + t.body + ' <a href="' + policyUrl + '">' + t.policy + '</a>.</p>' +
+        '<div class="su-consent__prefs" hidden>' +
+          pref('necessary', t.necessary, t.necessaryDesc, true) +
+          pref('statistics', t.statistics, t.statisticsDesc, false) +
+          pref('marketing', t.marketing, t.marketingDesc, false) +
+        '</div>' +
+        '<div class="su-consent__actions">' +
+          '<button type="button" class="su-consent__btn su-consent__btn--ghost" data-act="settings" aria-expanded="false">' + t.settings + '</button>' +
+          '<button type="button" class="su-consent__btn" data-act="reject">' + t.reject + '</button>' +
+          '<button type="button" class="su-consent__btn" data-act="accept">' + t.accept + '</button>' +
+          '<button type="button" class="su-consent__btn" data-act="save" hidden>' + t.save + '</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(root);
+
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]');
+      if (!b) return;
+      var act = b.getAttribute('data-act');
+      if (act === 'accept') { save(true, true); hide(); }
+      else if (act === 'reject') { save(false, false); hide(); }
+      else if (act === 'save') {
+        save(root.querySelector('#su-consent-statistics').checked, root.querySelector('#su-consent-marketing').checked);
+        hide();
+      } else if (act === 'settings') {
+        var prefs = root.querySelector('.su-consent__prefs');
+        var open = prefs.hidden;
+        prefs.hidden = !open;
+        b.setAttribute('aria-expanded', String(open));
+        root.querySelector('[data-act="save"]').hidden = !open;
+      }
+    });
+  }
+
+  function pref(id, label, desc, locked) {
+    return '<label class="su-consent__pref" for="su-consent-' + id + '">' +
+      '<input type="checkbox" id="su-consent-' + id + '"' + (locked ? ' checked disabled' : '') + '>' +
+      '<span><strong>' + label + (locked ? ' <em>(' + t.always + ')</em>' : '') + '</strong><br>' + desc + '</span>' +
+      '</label>';
+  }
+
+  function show(withPrefs) {
+    if (!root) build();
+    var c = read();
+    root.querySelector('#su-consent-statistics').checked = !!(c && c.s);
+    root.querySelector('#su-consent-marketing').checked = !!(c && c.m);
+    if (withPrefs) {
+      root.querySelector('.su-consent__prefs').hidden = false;
+      root.querySelector('[data-act="save"]').hidden = false;
+      root.querySelector('[data-act="settings"]').setAttribute('aria-expanded', 'true');
+    }
+    root.classList.add('is-visible');
+    var first = root.querySelector('[data-act="accept"]');
+    if (first) first.focus({ preventScroll: true });
+  }
+
+  function hide() {
+    if (root) root.classList.remove('is-visible');
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-su-consent-open]');
+    if (a) { e.preventDefault(); show(true); }
+  });
+
+  function init() { if (!read()) show(false); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
